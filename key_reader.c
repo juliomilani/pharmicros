@@ -60,7 +60,7 @@ char key_detect(){
 
    return 0;
 }
-
+/*
 void main(){
     while(1){
 			key_pressed = key_detect();
@@ -68,4 +68,4 @@ void main(){
 				LED = !LED;
 			}
 		}
-}
+}*/
