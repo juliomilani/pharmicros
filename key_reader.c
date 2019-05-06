@@ -4,21 +4,23 @@
 
 //Essa funcao ler o botao pressionado por interrupcao
 
-#include <reg51.h>
+//#include <reg51.h>
+#include <stdio.h>
 
 sfr porta3 = 0xB0;
 sbit LED = porta3^5;
 sfr porta0 = 0x80;
 char bounce = 8;
-unsigned char keypad[4][4] =	{{'0','1','2','3'},
-            	                {'4','5','6','7'},
-			                	{'8','9','A','B'},
-		                		{'C','D','E','F'} };
+char key_pressed;
+unsigned char keypad[4][3] =	{{'1','2','3'},
+            	                {'4','5','6'},
+															{'7','8','9'},
+															{'*','0','#'}};
 
 
 void delay(){
     unsigned short a;
-    for(a=0;a<500;a++);
+    for(a=0;a<100;a++);
 }
 
 
@@ -34,9 +36,9 @@ char debounce(char linha, char coluna)
 
     while(count != bounce){
         delay();
-        key_now = porta0 & (1<<coluna)
+        key_now = porta0 & (1<<coluna);
         if(key_now == key_last){
-            count = count+1; 
+            count++; 
         }
         else{
             count = 0;
@@ -48,16 +50,15 @@ char debounce(char linha, char coluna)
     return key_valid;
 }
 
-
-unsigned char key_detect(){
+char key_detect(){
     unsigned char linha = 0;
     unsigned char coluna = 0;
 
-    for(linha=0;linha++;linha<4){
-        for(coluna=0;coluna++;coluna<4){
-            if(debounce(linha,coluna)){
-                while(!debounce(linha,coluna))
-                return keypad[linha,coluna];
+    for(linha=0;linha<4;linha++){
+        for(coluna=0;coluna<3;coluna++){
+            if(!debounce(linha,coluna)){
+                while(!debounce(linha,coluna));
+                return keypad[linha][coluna];
             }
         }
     }
@@ -65,33 +66,49 @@ unsigned char key_detect(){
 
     return 0;
 }
-
-char key_detect2(char linha){
+/*
+char key_detect2(){
     unsigned char linha = 0;
     unsigned char col = 0;
-    while(linha<4){
+    for(linha=0;linha++;linha<4){
         porta0 = ~(1<<(7-linha));
-        if((0b000111 & porta0)==0){ //checks if any column is pressed
-            linha++;
-        }else{
-            for(col=0;col++;col<4){ //find pressed column
-                if (porta0 & (1<<coluna)){
-                    return keypad[linha,coluna];
-                }
+				for(col=0;col++;col<4){ //find pressed column
+				    if (~(porta0 & (1<<col))){
+								delay();
+								while(~(porta0 & (1<<col)));
+                //return keypad[linha][col];
+								return 1;
             }
-        }
+				}
     }
     return 0;
-}
+}*/
 
-
+unsigned char i;
 
 void main(){
 
     while(1){
-        if(key_detect()=='6'){
-            LED = !LED;
-        }
-    }
+			/*
+			char row = 0;
+			char col = 0;
+			for(row=0;row<4;row++){
+				for(col=0;col<3;col++){
+					if(!debounce(row,col)){
+								while(!debounce(row,col)){}
+								LED = !LED;							
+					}
+				}
+			}*/
+					
+			
 
+			key_pressed = key_detect();
+			if(key_pressed=='6'||key_pressed=='5'){
+				LED = !LED;
+			}
+
+		}
+			
 }
+
