@@ -22,6 +22,7 @@ int all_widths[]={212222,222122,222221,121223,121322,131222,122213,122312,132212
 void serial2pattern(unsigned char * serial_in, unsigned char *patt){
     //ex: 
     //serial_in[] = {'S','T',2,0xb2,0x00};
+    //patt = output buffer array
     //patt = {1,0,1,1,0,0,1,0,0,0,0}; get 11*msg digits pattern from num_bytes bytes
     int num_bytes = serial_in[2];
     int num_messages = num_bytes*8/11;
@@ -64,6 +65,7 @@ pattern[11] eh sempre 0
 
 
 int widths2value(int larguras){
+    //recebe as larguras e confronta com all_widths
     for(int i=0;i<107;i++){
         if(larguras==all_widths[i]){
             return i;
@@ -75,7 +77,6 @@ int widths2value(int larguras){
 
 
 void main(){
-    int sym;
     //unsigned char serial_in[] = {'S','T', 2, 0xb2, 0};
     //unsigned char serial_in[] = {'S','T',3,0xb2,0x16,0x40};
     unsigned char serial_in[] = {'S','T',6,0x8b,0x1b,0xa2,0xec,0x5b,0x80};
