@@ -8,33 +8,34 @@ int all_widths[]={212222,222122,222221,121223,121322,131222,122213,122312,132212
 // 10110010 | 000(0 0000)
 //  B2|00 = 178; 0
 
+//char serial_in[] = {'S','T',3,0xb2,0x16,0x40};
+//69;69 = 10110010 00010110 010000(00)
+//69;69 =    B2       16        40
+
+//34,51,45,42 = 10001011000 | 11011101000 | 10111011000 |10110111000
+//              10001011     00011011 10100010 11101100 01011011 1000(0000)
+//34 51 45 42 =  8B          1B       A2         EC       5B         80
+//char serial_in[] = {'S','T',6,0x8b,0x1b,0xa2,0xec,0x5b,0x80};
+
+
 
 void serial2pattern(unsigned char * serial_in, unsigned char *patt){
     //ex: 
     //serial_in[] = {'S','T',2,0xb2,0x00};
-    //patt = {1,0,1,1,0,0,1,0,0,0,0}; get 11 digits pattern from num_bytes bytes
+    //patt = {1,0,1,1,0,0,1,0,0,0,0}; get 11*msg digits pattern from num_bytes bytes
     int num_bytes = serial_in[2];
-    unsigned int all = 0;
-    char bit;
-    unsigned char bin[11];
-
-    
-    for(int j=3;j<3+num_bytes;j++){
-        //printf("%d",j);
-        all = (all << 8) | serial_in[j];
-    }
-
-    for(int i=32;i>=0;i--){
-        bit = (all>>i)&1;
-        if(bit){
-            for(int j=0;j<11;j++){
-                patt[j] = all>>(i-j)&1;
-                //printf("%d",patt[j]);
-            }
-            break;
+    int num_messages = num_bytes*8/11;
+    int current_byte;
+    int resto;
+    for(int msg=0;msg<num_messages;msg++){
+        for(int j=0;j<11;j++){
+            current_byte = (j+msg*11)/8;
+            resto = (j+msg*11) - current_byte*8;
+            //printf("%d %d \n",current_byte,resto);
+            patt[j+msg*11] = (serial_in[current_byte+3]>>(7-resto))&1;
         }
-
     }
+
 
 }
 
@@ -75,18 +76,28 @@ int widths2value(int larguras){
 
 void main(){
     int sym;
-    unsigned char serial_in[] = {'L','B', 2, 0xb2, 0};
-    //char pattern[] = {1,0,1,1,0,0,1,0,0,0,0};
-    unsigned char pat2[11];
-
+    //unsigned char serial_in[] = {'S','T', 2, 0xb2, 0};
+    //unsigned char serial_in[] = {'S','T',3,0xb2,0x16,0x40};
+    unsigned char serial_in[] = {'S','T',6,0x8b,0x1b,0xa2,0xec,0x5b,0x80};
+    unsigned char pat2[500];
+    unsigned char message[11];
+    int lar;
+    int val;
+    int num_bytes = serial_in[2];
+    int num_msg = 8*num_bytes/11;
     serial2pattern(serial_in,pat2);
+    //for(int i=0;i<num_msg*11;i++) printf("%i",pat2[i]);
+    //printf("\n");
+    for(int msg=0;msg<num_msg;msg++){
+        for(int j=0;j<11;j++){
+            message[j] = pat2[j+msg*11];
+        }
+        lar = pattern2widths(message);
+        val = widths2value(lar);
+        //for(int i=0;i<11;i++) printf("%i",message[i]);
+        //printf("\nLarguras: %d \n",lar);
+        printf("Valor: %d \n",val);
 
-    int lar = pattern2widths(pat2);
-    int val = widths2value(lar);
-
-    printf("Pattern: ");
-    for(int i=0;i<11;i++) printf("%i",pat2[i]);
-    printf("\nLarguras: %d \n",lar);
-    printf("Valor: %d \n",val);
+    } 
+    
 }
-
